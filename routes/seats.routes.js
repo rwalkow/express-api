@@ -56,11 +56,10 @@ router.route('/seats/:id').put((req, res) => {
   const results = db.find(obj => {
     return obj.id == req.params.id;
   })
-  results.performer = performer,
-  results.genre = genre,
-  results.price = price,
   results.day = day,
-  results.image = image,
+  results.seat = seat,
+  results.client = client,
+  results.email = email,
   res.json({ message: 'Update OK' });
 });
 
