@@ -38,6 +38,7 @@ router.route('/seats/').post((req, res) => {
       res.json({ message: 'Save' });
       const obj = {id: uuidv4(),day: day, seat: seat, client: client, email: email, };
       db.push(obj);
+      req.io.emit('seatsUpdated', db);
     }
     else {
       res.status(500);
