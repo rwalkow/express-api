@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+
 const concertsSchema = new mongoose.Schema({
 
   performer: { type: String, required: true, ref: 'Performer' },
@@ -8,6 +9,7 @@ const concertsSchema = new mongoose.Schema({
   image: { type: String, required: true }
 },
   {
+    // versionKey: '_somethingElse' 
     versionKey: false
   });
 

@@ -44,14 +44,30 @@ app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, '/client/build/index.html'));
 });
 
+
 app.use((req, res) => {
   if (res.status(404)) res.json({ message: '404: Page not found!' });
-});
+})
 
-mongoose.connect('mongodb://localhost:27017/NewWaveDB', { useNewUrlParser: true, useUnifiedTopology: true });
+const NODE_ENV = process.env.NODE_ENV;
+const DB_USER = process.env.DB_USER;
+const DB_PASSWORD = process.env.DB_PASSWORD;
+let dbURI = '';
+
+if (NODE_ENV === 'production') dbURI = 'mongodb+srv://walek:KaKSRJ1g3alWjtHs@cluster0.w7n5ciu.mongodb.net/?retryWrites=true&w=majority';
+ else if (NODE_ENV === 'test') dbURI = 'mongodb://localhost:27017/NewWaveDBtest';
+  else dbURI = 'mongodb://localhost:27017/NewWaveDB';
+
+mongoose.connect(dbURI, { useNewUrlParser: true, useUnifiedTopology: true });
 const db = mongoose.connection;
 
 db.once('open', () => {
   console.log('Connected to the database');
 });
 db.on('error', err => console.log('Error ' + err));
+
+io.on('connection', (socket) => {
+  console.log('Connect - new socket!');
+});
+
+module.exports = server;

@@ -1,23 +1,15 @@
 import { Button, Form, FormGroup, Label, Input, Row, Col, Alert, Progress } from 'reactstrap';
-import { useState, useEffect } from 'react';
-
+import { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { addSeatRequest, getRequests, loadSeatsRequest, loadSeats } from '../../../redux/seatsRedux';
+import { addSeatRequest, getRequests, loadSeatsRequest } from '../../../redux/seatsRedux';
 
 import './OrderTicketForm.scss';
 import SeatChooser from './../SeatChooser/SeatChooser';
-import io from 'socket.io-client';
 
 const OrderTicketForm = () => {
   const dispatch = useDispatch();
   const requests = useSelector(getRequests);
-  const socket = io(
-    process.env.NODE_ENV === 'production' ? '/' : 'http://localhost:8000/'
-  );
-
-  useEffect(() => {
-    socket.on('seatsUpdated', (seats) => {dispatch(loadSeats(seats)); });
-  }, []);
+  console.log(requests);
 
   const [order, setOrder] = useState({
     client: '',
@@ -44,10 +36,12 @@ const OrderTicketForm = () => {
 
   const submitForm = async (e) => {
     e.preventDefault();
-
+    
     if(order.client && order.email && order.day && order.seat) {
-      dispatch(addSeatRequest(order));
-      dispatch(loadSeatsRequest());
+      
+      dispatch(addSeatRequest(order)).then(
+        dispatch(loadSeatsRequest())
+      );
       setOrder({
         client: '',
         email: '',
@@ -87,7 +81,7 @@ const OrderTicketForm = () => {
           </FormGroup>
           <FormGroup check>
             <Label check>
-              <Input required type="checkbox" /> I agree with <a href="/terms-and-conditions">Terms and conditions</a> and <a href="/privacy-policy">Privacy Policy</a>.
+              <Input required type="checkbox" /> I agree with <a href="#">Terms and conditions</a> and <a href="#">Privacy Policy</a>.
             </Label>
           </FormGroup>
           <Button color="primary" className="mt-3">Submit</Button>
