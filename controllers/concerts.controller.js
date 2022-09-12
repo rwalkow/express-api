@@ -6,19 +6,28 @@ const sanitize = require('mongo-sanitize');
 
 exports.getAll = async (req, res) => {
   try {
+    const [concerts, seats] = await Promise.all([
+      await Concert.find().populate('performer').populate('genre'),
+      await Seat.find()
+    ])
 
-    const findConcerts = await Concert.find().populate('performer').populate('genre');
+    const calculatedSeats = seats.reduce((result, seat) => {
+      result[seat.day] = (result[seat.day] || 0) + 1;
 
-    const freeSeats = async (day) => {
-      const totalSeatsOnConcert = 50;
-      const seats = await Seat.find({ day: day });
-      const how = totalSeatsOnConcert - seats.length;
-      console.log('seats.length:', how);
-      return how;
+      return result
+    }, {})
+
+    const freeSeats = (day) => {
+      return 50 - calculatedSeats[day]
     }
 
-    const findConcertsNew = findConcerts.map((data) => ({ ...data._doc, ticket: freeSeats(data._doc.day) }));
-    res.json(findConcertsNew);
+    const concertsWithSeats = concerts.map(concert => ({
+      ...concert._doc,
+      freeSeats: freeSeats(concert.day)
+    }))
+
+    res.json(concertsWithSeats);
+    console.log('concertsWithSeats:', concertsWithSeats);
   }
   catch (err) {
     console.log(err);
@@ -153,11 +162,9 @@ exports.getPriceMinMax = async (req, res) => {
   try {
     res.json(await Concert.find(
       {
-        $or: [
-          { price: { $gt: req.params.price_min} },
-          { price: { $lt: req.params.price_max } },
-          { price: { $eq: req.params.price_min } },
-          { price: { $eq: req.params.price_max } }
+        $and: [
+          { price: { $gte: req.params.price_min } },
+          { price: { $lte: req.params.price_max } }
         ]
       }).populate('performer').populate('genre'));
   }
@@ -173,7 +180,7 @@ exports.getFreeSeats = async (req, res) => {
     const seats = await Seat.find({ day: req.params.day });
     const freeSeats = totalSeatsOnConcert - seats.length;
 
-    res.json({freeSeats: freeSeats});
+    res.json({ freeSeats: freeSeats });
   }
   catch (err) {
     console.log(err);

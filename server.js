@@ -47,7 +47,6 @@ app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, '/client/build/index.html'));
 });
 
-
 app.use((req, res) => {
   if (res.status(404)) res.json({ message: '404: Page not found!' });
 })
@@ -57,7 +56,7 @@ const DB_USER = process.env.DB_USER;
 const DB_PASSWORD = process.env.DB_PASSWORD;
 let dbURI = '';
 
-if (NODE_ENV === 'production') dbURI = 'mongodb+srv://DB_USER:DB_PASSWORD@cluster0.w7n5ciu.mongodb.net/?retryWrites=true&w=majority';
+if (NODE_ENV === 'production') dbURI = 'mongodb+srv://' + DB_USER + ':' + DB_PASSWORD + '@cluster0.w7n5ciu.mongodb.net/?retryWrites=true&w=majority';
  else if (NODE_ENV === 'test') dbURI = 'mongodb://localhost:27017/NewWaveDBtest';
   else dbURI = 'mongodb://localhost:27017/NewWaveDB';
 
